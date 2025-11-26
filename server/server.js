@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
+const User = require("./models/User");
 
 dotenv.config();
 
@@ -12,6 +13,22 @@ app.use(express.json()); // Let server understand JSON body
 
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", message: "Server is running" });
+});
+
+// TEMPORARY: test route to create a user
+app.get("/api/test-create-user", async (req, res) => {
+  try {
+    const user = await User.create({
+      name: "Test User",
+      email: `test${Date.now()}@example.com`,
+      passwordHash: "fakehash123", // later we will use real hash
+    });
+
+    res.json({ message: "User created", user });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error creating user" });
+  }
 });
 
 const PORT = process.env.PORT || 5000;
