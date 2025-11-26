@@ -44,7 +44,32 @@ async function getMyProjects(req, res) {
   }
 }
 
+// @desc   Get a single project by id for the logged in user
+// @route  GET /api/projects/:projectId
+// @access Private
+async function getProjectById(req, res) {
+  try {
+    const { projectId } = req.params;
+
+    const project = await Project.findOne({
+      _id: projectId,
+      owner: req.userId,
+    });
+
+    if (!project) {
+      return res.status(404).json({ message: "Project not found or not yours" });
+    }
+
+    res.json({ project });
+  } catch (error) {
+    console.error("Error in getProjectById:", error);
+    res.status(500).json({ message: "Something went wrong while fetching project" });
+  }
+}
+
+
 module.exports = {
   createProject,
   getMyProjects,
+  getProjectById,
 };
