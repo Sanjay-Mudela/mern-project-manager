@@ -4,6 +4,7 @@ const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const authRoutes = require("./routes/authRoutes");
 const projectRoutes = require("./routes/projectRoutes");
+const taskRoutes = require("./routes/taskRoutes");
 
 
 dotenv.config();
@@ -14,6 +15,7 @@ app.use(cors()); // Allow requests from frontend
 app.use(express.json()); // Let server understand JSON body
 app.use("/api/auth", authRoutes);
 app.use("/api/projects", projectRoutes);
+app.use("/api/tasks", taskRoutes);
 
 
 app.get("/api/health", (req, res) => {
