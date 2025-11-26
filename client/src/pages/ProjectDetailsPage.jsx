@@ -1,17 +1,16 @@
+// src/pages/ProjectDetailsPage.jsx
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import api from "../api/client";
 
 function ProjectDetailsPage() {
   const { projectId } = useParams();
-
   const [project, setProject] = useState(null);
   const [tasks, setTasks] = useState([]);
-
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Task form state
+  // Form states
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState("medium");
@@ -20,29 +19,25 @@ function ProjectDetailsPage() {
   const [updatingTaskId, setUpdatingTaskId] = useState(null);
   const [deletingTaskId, setDeletingTaskId] = useState(null);
 
-  // Load project + tasks on mount or when projectId changes
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
       setError("");
 
       try {
-        // 1) Fetch project details
         const projectRes = await api.get(`/projects/${projectId}`);
         setProject(projectRes.data.project);
 
-        // 2) Fetch tasks for this project
-        const tasksRes = await api.get(`/tasks`, {
+        const taskRes = await api.get("/tasks", {
           params: { projectId },
         });
-        setTasks(tasksRes.data.tasks || []);
+        setTasks(taskRes.data.tasks || []);
       } catch (err) {
-        console.error("Error loading project or tasks:", err);
-        let msg = "Could not load project. Please try again.";
-        if (err.response?.data?.message) {
-          msg = err.response.data.message;
-        }
-        setError(msg);
+        console.error("Error fetching project or tasks:", err);
+        setError(
+          err.response?.data?.message ||
+            "Could not load the project. Try again."
+        );
       } finally {
         setLoading(false);
       }
@@ -51,7 +46,6 @@ function ProjectDetailsPage() {
     fetchData();
   }, [projectId]);
 
-  // Helper: group tasks by status
   const tasksByStatus = {
     todo: tasks.filter((t) => t.status === "todo"),
     "in-progress": tasks.filter((t) => t.status === "in-progress"),
@@ -60,15 +54,12 @@ function ProjectDetailsPage() {
 
   async function handleCreateTask(e) {
     e.preventDefault();
-    setError("");
-
     if (!title.trim()) {
       setError("Task title is required");
       return;
     }
 
     setCreatingTask(true);
-
     try {
       const res = await api.post("/tasks", {
         title: title.trim(),
@@ -79,20 +70,15 @@ function ProjectDetailsPage() {
       });
 
       const newTask = res.data.task;
-      // Add new task to list
       setTasks((prev) => [newTask, ...prev]);
 
-      // Clear form
+      // reset form
       setTitle("");
       setDescription("");
       setPriority("medium");
     } catch (err) {
       console.error("Error creating task:", err);
-      let msg = "Could not create task.";
-      if (err.response?.data?.message) {
-        msg = err.response.data.message;
-      }
-      setError(msg);
+      setError(err.response?.data?.message || "Could not create task");
     } finally {
       setCreatingTask(false);
     }
@@ -100,278 +86,190 @@ function ProjectDetailsPage() {
 
   async function handleChangeStatus(taskId, newStatus) {
     setUpdatingTaskId(taskId);
-    setError("");
-
     try {
       const res = await api.put(`/tasks/${taskId}`, { status: newStatus });
-      const updatedTask = res.data.task;
-
       setTasks((prev) =>
-        prev.map((t) => (t._id === taskId ? updatedTask : t))
+        prev.map((t) => (t._id === taskId ? res.data.task : t))
       );
     } catch (err) {
       console.error("Error updating task:", err);
-      let msg = "Could not update task.";
-      if (err.response?.data?.message) {
-        msg = err.response.data.message;
-      }
-      setError(msg);
+      setError(err.response?.data?.message || "Could not update task");
     } finally {
       setUpdatingTaskId(null);
     }
   }
 
   async function handleDeleteTask(taskId) {
-    const confirmed = window.confirm("Are you sure you want to delete this task?");
-    if (!confirmed) return;
-
+    if (!window.confirm("Are you sure you want to delete this task?")) return;
     setDeletingTaskId(taskId);
-    setError("");
-
     try {
       await api.delete(`/tasks/${taskId}`);
       setTasks((prev) => prev.filter((t) => t._id !== taskId));
     } catch (err) {
       console.error("Error deleting task:", err);
-      let msg = "Could not delete task.";
-      if (err.response?.data?.message) {
-        msg = err.response.data.message;
-      }
-      setError(msg);
+      setError(err.response?.data?.message || "Could not delete task");
     } finally {
       setDeletingTaskId(null);
     }
   }
 
-  if (loading) {
-    return <p>Loading project...</p>;
-  }
-
-  if (error) {
+  if (loading) return <p className="text-slate-300">Loading project...</p>;
+  if (error)
     return (
       <div>
-        <p style={{ color: "red", marginBottom: "1rem" }}>{error}</p>
-        <Link to="/projects">Back to projects</Link>
+        <p className="text-red-400 mb-3">{error}</p>
+        <Link to="/projects" className="text-indigo-400 hover:underline">
+          ← Back to projects
+        </Link>
       </div>
     );
-  }
-
-  if (!project) {
-    return (
-      <div>
-        <p>Project not found.</p>
-        <Link to="/projects">Back to projects</Link>
-      </div>
-    );
-  }
 
   return (
-    <div>
-      {/* Breadcrumb */}
-      <p style={{ marginBottom: "0.5rem", fontSize: "0.9rem" }}>
-        <Link to="/projects" style={{ textDecoration: "none" }}>
-          ← Back to projects
+    <div className="space-y-6 text-slate-200">
+      {/* Back Button */}
+      <p>
+        <Link
+          to="/projects"
+          className="text-indigo-400 hover:text-indigo-300 text-sm"
+        >
+          ← Back
         </Link>
       </p>
 
-      {/* Project header */}
-      <h1 style={{ marginBottom: "0.25rem" }}>{project.name}</h1>
-      {project.description && (
-        <p style={{ marginBottom: "1rem", opacity: 0.85 }}>
-          {project.description}
-        </p>
-      )}
+      {/* Project info */}
+      <div>
+        <h1 className="text-2xl font-bold text-white">{project.name}</h1>
+        {project.description && (
+          <p className="text-sm text-slate-400 mt-1">{project.description}</p>
+        )}
+      </div>
 
-      {/* Task create card */}
-      <div
-        style={{
-          background: "white",
-          borderRadius: "8px",
-          padding: "1rem",
-          marginBottom: "1.5rem",
-          boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-        }}
-      >
-        <h2 style={{ marginBottom: "0.75rem", fontSize: "1rem" }}>
-          Add a new task
+      {/* Create task form */}
+      <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 shadow-sm">
+        <h2 className="text-sm font-medium text-slate-300 mb-3">
+          Add new task
         </h2>
 
         {error && (
-          <div style={{ marginBottom: "0.75rem", color: "red", fontSize: "0.9rem" }}>
+          <div className="mb-3 text-xs text-red-300 bg-red-500/10 px-3 py-2 rounded">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleCreateTask}>
-          <div style={{ marginBottom: "0.5rem" }}>
-            <input
-              type="text"
-              placeholder="Task title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              style={{ width: "100%", padding: "0.5rem" }}
-            />
-          </div>
-          <div style={{ marginBottom: "0.5rem" }}>
-            <textarea
-              placeholder="Description (optional)"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              style={{ width: "100%", padding: "0.5rem", minHeight: "60px" }}
-            />
-          </div>
-          <div style={{ marginBottom: "0.75rem" }}>
-            <label style={{ marginRight: "0.5rem", fontSize: "0.9rem" }}>
-              Priority:
-            </label>
+        <form
+          onSubmit={handleCreateTask}
+          className="grid gap-3 sm:grid-cols-[2fr,3fr,auto]"
+        >
+          <input
+            type="text"
+            placeholder="Task title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500"
+          />
+
+          <textarea
+            placeholder="Description (optional)"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2 text-sm min-h-10 focus:ring-2 focus:ring-indigo-500"
+          />
+
+          <div className="flex flex-col">
+            <label className="text-xs text-slate-300">Priority</label>
             <select
               value={priority}
               onChange={(e) => setPriority(e.target.value)}
-              style={{ padding: "0.4rem" }}
+              className="rounded-lg border border-slate-700 bg-slate-900/60 px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500"
             >
               <option value="low">Low</option>
               <option value="medium">Medium</option>
               <option value="high">High</option>
             </select>
+            <button
+              type="submit"
+              className="mt-2 rounded-lg bg-indigo-500 py-2 font-semibold text-xs text-white hover:bg-indigo-400"
+              disabled={creatingTask}
+            >
+              {creatingTask ? "Adding..." : "Add Task"}
+            </button>
           </div>
-          <button
-            type="submit"
-            disabled={creatingTask}
-            style={{
-              padding: "0.5rem 1rem",
-              cursor: creatingTask ? "not-allowed" : "pointer",
-            }}
-          >
-            {creatingTask ? "Adding task..." : "Add Task"}
-          </button>
         </form>
       </div>
 
-      {/* Tasks board */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-          gap: "1rem",
-        }}
-      >
+      {/* Board columns */}
+      <div className="grid gap-4 sm:grid-cols-3">
         {["todo", "in-progress", "done"].map((status) => (
           <div
             key={status}
-            style={{
-              background: "#f9fafb",
-              borderRadius: "8px",
-              padding: "0.75rem",
-              minHeight: "200px",
-              border: "1px solid #e5e7eb",
-            }}
+            className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 shadow-sm"
           >
-            <h3
-              style={{
-                marginBottom: "0.5rem",
-                fontSize: "0.95rem",
-                textTransform: "uppercase",
-                letterSpacing: "0.05em",
-              }}
-            >
+            <h3 className="text-sm font-semibold mb-2">
               {status === "todo"
                 ? "To Do"
                 : status === "in-progress"
                 ? "In Progress"
                 : "Done"}
             </h3>
-
-            {tasksByStatus[status].length === 0 ? (
-              <p style={{ fontSize: "0.85rem", opacity: 0.7 }}>No tasks here yet.</p>
-            ) : (
-              tasksByStatus[status].map((task) => (
-                <div
-                  key={task._id}
-                  style={{
-                    background: "white",
-                    borderRadius: "6px",
-                    padding: "0.5rem 0.6rem",
-                    marginBottom: "0.5rem",
-                    boxShadow: "0 1px 2px rgba(0,0,0,0.06)",
-                    fontSize: "0.9rem",
-                  }}
-                >
-                  <div style={{ display: "flex", justifyContent: "space-between" }}>
-                    <strong>{task.title}</strong>
-                    <span
-                      style={{
-                        fontSize: "0.75rem",
-                        padding: "0.1rem 0.4rem",
-                        borderRadius: "999px",
-                        background:
-                          task.priority === "high"
-                            ? "#fee2e2"
-                            : task.priority === "low"
-                            ? "#d1fae5"
-                            : "#e5e7eb",
-                      }}
-                    >
-                      {task.priority}
-                    </span>
-                  </div>
-                  {task.description && (
-                    <p style={{ marginTop: "0.25rem", opacity: 0.8 }}>
-                      {task.description}
-                    </p>
-                  )}
-                  <p
-                    style={{
-                      marginTop: "0.35rem",
-                      fontSize: "0.75rem",
-                      opacity: 0.7,
-                    }}
-                  >
-                    Created: {new Date(task.createdAt).toLocaleString()}
-                  </p>
-
-                  {/* Actions */}
+            <div className="space-y-2">
+              {tasksByStatus[status].length === 0 ? (
+                <p className="text-xs text-slate-500">
+                  No tasks in this column.
+                </p>
+              ) : (
+                tasksByStatus[status].map((task) => (
                   <div
-                    style={{
-                      marginTop: "0.4rem",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      gap: "0.5rem",
-                    }}
+                    key={task._id}
+                    className="bg-slate-800/50 rounded-lg p-3 shadow-sm"
                   >
-                    <select
-                      value={task.status}
-                      onChange={(e) =>
-                        handleChangeStatus(task._id, e.target.value)
-                      }
-                      disabled={updatingTaskId === task._id}
-                      style={{ fontSize: "0.8rem", padding: "0.2rem" }}
-                    >
-                      <option value="todo">To Do</option>
-                      <option value="in-progress">In Progress</option>
-                      <option value="done">Done</option>
-                    </select>
+                    <div className="flex justify-between items-start">
+                      <span className="text-sm font-medium text-white">
+                        {task.title}
+                      </span>
+                      <span
+                        className={`px-2 py-1 rounded-full text-[10px] ${
+                          task.priority === "high"
+                            ? "bg-red-500/20 text-red-300"
+                            : task.priority === "low"
+                            ? "bg-emerald-500/20 text-emerald-300"
+                            : "bg-slate-500/20 text-slate-300"
+                        }`}
+                      >
+                        {task.priority}
+                      </span>
+                    </div>
 
-                    <button
-                      onClick={() => handleDeleteTask(task._id)}
-                      disabled={deletingTaskId === task._id}
-                      style={{
-                        fontSize: "0.75rem",
-                        padding: "0.25rem 0.5rem",
-                        background: "#ef4444",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                        cursor:
-                          deletingTaskId === task._id ? "not-allowed" : "pointer",
-                      }}
-                    >
-                      {deletingTaskId === task._id ? "Deleting..." : "Delete"}
-                    </button>
+                    {/* Actions */}
+                    <div className="flex justify-between items-center mt-2 gap-2">
+                      <select
+                        value={task.status}
+                        onChange={(e) =>
+                          handleChangeStatus(task._id, e.target.value)
+                        }
+                        disabled={updatingTaskId === task._id}
+                        className="text-xs bg-slate-900/70 border border-slate-700 rounded px-2 py-1"
+                      >
+                        <option value="todo">To Do</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="done">Done</option>
+                      </select>
+
+                      <button
+                        onClick={() => handleDeleteTask(task._id)}
+                        disabled={deletingTaskId === task._id}
+                        className="text-[11px] px-2 py-1 rounded bg-red-500/30 hover:bg-red-500/40"
+                      >
+                        {deletingTaskId === task._id ? "..." : "Delete"}
+                      </button>
+                    </div>
+
+                    <p className="text-[10px] mt-2 text-slate-500">
+                      {new Date(task.createdAt).toLocaleString()}
+                    </p>
                   </div>
-                </div>
-              ))
-            )}
+                ))
+              )}
+            </div>
           </div>
         ))}
       </div>
