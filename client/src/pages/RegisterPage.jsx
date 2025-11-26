@@ -16,14 +16,38 @@ function RegisterPage() {
     e.preventDefault();
     setError("");
 
-    if (!name || !email || !password) {
+    const trimmedName = name.trim();
+    const trimmedEmail = email.trim();
+
+    if (!trimmedName || !trimmedEmail || !password) {
       const msg = "Please fill all fields";
       setError(msg);
       toast.error(msg);
       return;
     }
 
-    const result = await register(name, email, password);
+    if (trimmedName.length < 2) {
+      const msg = "Name should be at least 2 characters";
+      setError(msg);
+      toast.error(msg);
+      return;
+    }
+
+    if (!trimmedEmail.includes("@")) {
+      const msg = "Please enter a valid email address";
+      setError(msg);
+      toast.error(msg);
+      return;
+    }
+
+    if (password.length < 6) {
+      const msg = "Password should be at least 6 characters";
+      setError(msg);
+      toast.error(msg);
+      return;
+    }
+
+    const result = await register(trimmedName, trimmedEmail, password);
 
     if (result.success) {
       toast.success("Account created successfully");

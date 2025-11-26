@@ -22,7 +22,8 @@ function ProjectsPage() {
       } catch (err) {
         console.error("Error fetching projects:", err);
         const msg =
-          err.response?.data?.message || "Could not load projects. Please try again.";
+          err.response?.data?.message ||
+          "Could not load projects. Please try again.";
         setError(msg);
         toast.error(msg);
       } finally {
@@ -37,8 +38,17 @@ function ProjectsPage() {
     e.preventDefault();
     setError("");
 
-    if (!name.trim()) {
+    const trimmedName = name.trim();
+
+    if (!trimmedName) {
       const msg = "Project name is required";
+      setError(msg);
+      toast.error(msg);
+      return;
+    }
+
+    if (trimmedName.length < 3) {
+      const msg = "Project name should be at least 3 characters";
       setError(msg);
       toast.error(msg);
       return;
@@ -47,7 +57,7 @@ function ProjectsPage() {
     setCreating(true);
     try {
       const res = await api.post("/projects", {
-        name: name.trim(),
+        name: trimmedName,
         description: description.trim(),
       });
 
@@ -58,8 +68,7 @@ function ProjectsPage() {
       toast.success("Project created");
     } catch (err) {
       console.error("Error creating project:", err);
-      const msg =
-        err.response?.data?.message || "Could not create project.";
+      const msg = err.response?.data?.message || "Could not create project.";
       setError(msg);
       toast.error(msg);
     } finally {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import toast from "react-hot-toast";      // ✅ NEW
+import toast from "react-hot-toast"; // ✅ NEW
 import api from "../api/client";
 
 function ProjectDetailsPage() {
@@ -10,8 +10,8 @@ function ProjectDetailsPage() {
   const [tasks, setTasks] = useState([]);
 
   const [loading, setLoading] = useState(true);
-  const [pageError, setPageError] = useState("");   // ❗ for initial loading errors
-  const [taskError, setTaskError] = useState("");   // ❗ for "Add task" form errors
+  const [pageError, setPageError] = useState(""); // ❗ for initial loading errors
+  const [taskError, setTaskError] = useState(""); // ❗ for "Add task" form errors
 
   // Task form state
   const [title, setTitle] = useState("");
@@ -38,9 +38,10 @@ function ProjectDetailsPage() {
       } catch (err) {
         console.error("Error fetching project or tasks:", err);
         const msg =
-          err.response?.data?.message || "Could not load the project. Please try again.";
+          err.response?.data?.message ||
+          "Could not load the project. Please try again.";
         setPageError(msg);
-        toast.error(msg);             // ✅ toast for big error
+        toast.error(msg); // ✅ toast for big error
       } finally {
         setLoading(false);
       }
@@ -60,17 +61,27 @@ function ProjectDetailsPage() {
     e.preventDefault();
     setTaskError("");
 
-    if (!title.trim()) {
+    const trimmedTitle = title.trim();
+
+    if (!trimmedTitle) {
       const msg = "Task title is required";
       setTaskError(msg);
       toast.error(msg);
       return;
     }
 
+    if (trimmedTitle.length < 3) {
+      const msg = "Task title should be at least 3 characters";
+      setTaskError(msg);
+      toast.error(msg);
+      return;
+    }
+
     setCreatingTask(true);
+
     try {
       const res = await api.post("/tasks", {
-        title: title.trim(),
+        title: trimmedTitle,
         description: description.trim(),
         priority,
         status: "todo",
@@ -101,9 +112,7 @@ function ProjectDetailsPage() {
       const res = await api.put(`/tasks/${taskId}`, { status: newStatus });
       const updatedTask = res.data.task;
 
-      setTasks((prev) =>
-        prev.map((t) => (t._id === taskId ? updatedTask : t))
-      );
+      setTasks((prev) => prev.map((t) => (t._id === taskId ? updatedTask : t)));
 
       toast.success("Task updated");
     } catch (err) {
@@ -116,7 +125,9 @@ function ProjectDetailsPage() {
   }
 
   async function handleDeleteTask(taskId) {
-    const confirmed = window.confirm("Are you sure you want to delete this task?");
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this task?"
+    );
     if (!confirmed) return;
 
     setDeletingTaskId(taskId);
@@ -146,8 +157,13 @@ function ProjectDetailsPage() {
   if (pageError || !project) {
     return (
       <div className="space-y-3 text-slate-200">
-        <p className="text-red-400 text-sm">{pageError || "Project not found."}</p>
-        <Link to="/projects" className="text-indigo-400 hover:text-indigo-300 text-sm">
+        <p className="text-red-400 text-sm">
+          {pageError || "Project not found."}
+        </p>
+        <Link
+          to="/projects"
+          className="text-indigo-400 hover:text-indigo-300 text-sm"
+        >
           ← Back to projects
         </Link>
       </div>

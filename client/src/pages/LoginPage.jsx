@@ -15,14 +15,23 @@ function LoginPage() {
     e.preventDefault();
     setError("");
 
-    if (!email || !password) {
+    const trimmedEmail = email.trim();
+
+    if (!trimmedEmail || !password) {
       const msg = "Please enter email and password";
       setError(msg);
       toast.error(msg);
       return;
     }
 
-    const result = await login(email, password);
+    if (!trimmedEmail.includes("@")) {
+      const msg = "Please enter a valid email address";
+      setError(msg);
+      toast.error(msg);
+      return;
+    }
+
+    const result = await login(trimmedEmail, password);
 
     if (result.success) {
       toast.success("Logged in successfully");
