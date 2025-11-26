@@ -1,29 +1,26 @@
-import { useEffect, useState } from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import ProjectsPage from "./pages/ProjectsPage";
+import ProjectDetailsPage from "./pages/ProjectDetailsPage";
 
 function App() {
-  const [health, setHealth] = useState("Checking server...");
-
-  useEffect(() => {
-    // Call our backend
-    fetch("http://localhost:5000/api/health")
-      .then((res) => res.json())
-      .then((data) => {
-        setHealth(`${data.status} - ${data.message}`);
-      })
-      .catch((err) => {
-        console.error(err);
-        setHealth("Error: Cannot reach server");
-      });
-  }, []);
-
   return (
-    <div style={{ minHeight: "100vh", display: "flex", justifyContent: "center", alignItems: "center", fontFamily: "sans-serif", flexDirection: "column", gap: "1rem" }}>
-      <h1>Project Manager App (MERN)</h1>
-      <p>Backend health: {health}</p>
-      <p style={{ fontSize: "0.9rem", opacity: 0.7 }}>
-        If you see "ok - Server is running", frontend ↔ backend connection works!
-      </p>
-    </div>
+    <Routes>
+      {/* Default route - for now redirect to /projects */}
+      <Route path="/" element={<Navigate to="/projects" replace />} />
+
+      {/* Auth routes */}
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+
+      {/* Projects */}
+      <Route path="/projects" element={<ProjectsPage />} />
+      <Route path="/projects/:projectId" element={<ProjectDetailsPage />} />
+
+      {/* Fallback for unknown routes */}
+      <Route path="*" element={<div style={{ padding: "2rem" }}><h1>404 - Page not found</h1></div>} />
+    </Routes>
   );
 }
 
