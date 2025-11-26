@@ -7,12 +7,10 @@ function ProjectsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Form state for creating a new project
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [creating, setCreating] = useState(false);
 
-  // Load projects on first render
   useEffect(() => {
     async function fetchProjects() {
       setLoading(true);
@@ -52,11 +50,7 @@ function ProjectsPage() {
       });
 
       const newProject = res.data.project;
-
-      // Add new project at the top of the list
       setProjects((prev) => [newProject, ...prev]);
-
-      // Clear form
       setName("");
       setDescription("");
     } catch (err) {
@@ -72,119 +66,104 @@ function ProjectsPage() {
   }
 
   return (
-    <div>
-      <h1 style={{ marginBottom: "1rem" }}>Your Projects</h1>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold text-slate-50 tracking-tight">
+            Your projects
+          </h1>
+          <p className="text-sm text-slate-300">
+            Create projects and track tasks inside each one.
+          </p>
+        </div>
+      </div>
 
       {/* Create project card */}
-      <div
-        style={{
-          background: "white",
-          borderRadius: "8px",
-          padding: "1rem",
-          marginBottom: "1.5rem",
-          boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-        }}
-      >
-        <h2 style={{ marginBottom: "0.75rem", fontSize: "1rem" }}>
+      <div className="rounded-2xl border border-slate-800 bg-slate-900/80 px-4 py-4 shadow-sm backdrop-blur">
+        <h2 className="text-sm font-medium text-slate-100 mb-3">
           Create a new project
         </h2>
 
         {error && (
-          <div style={{ marginBottom: "0.75rem", color: "red", fontSize: "0.9rem" }}>
+          <div className="mb-3 rounded-md border border-red-500/60 bg-red-500/10 px-3 py-2 text-xs text-red-100">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleCreateProject}>
-          <div style={{ marginBottom: "0.5rem" }}>
+        <form
+          onSubmit={handleCreateProject}
+          className="flex flex-col gap-3 sm:grid sm:grid-cols-[2fr,3fr,auto] sm:items-start"
+        >
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-slate-300">Name</label>
             <input
               type="text"
-              placeholder="Project name"
+              placeholder="e.g. MERN Portfolio, Client Project..."
               value={name}
               onChange={(e) => setName(e.target.value)}
-              style={{ width: "100%", padding: "0.5rem" }}
+              className="w-full rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             />
           </div>
-          <div style={{ marginBottom: "0.5rem" }}>
+
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-slate-300">Description</label>
             <textarea
-              placeholder="Short description (optional)"
+              placeholder="Short summary (optional)"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              style={{ width: "100%", padding: "0.5rem", minHeight: "60px" }}
+              className="w-full rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 min-h-10"
             />
           </div>
-          <button
-            type="submit"
-            disabled={creating}
-            style={{
-              padding: "0.5rem 1rem",
-              cursor: creating ? "not-allowed" : "pointer",
-            }}
-          >
-            {creating ? "Creating..." : "Add Project"}
-          </button>
+
+          <div className="flex items-end">
+            <button
+              type="submit"
+              disabled={creating}
+              className="inline-flex items-center rounded-lg bg-indigo-500 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-400 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+            >
+              {creating ? "Creating..." : "Add project"}
+            </button>
+          </div>
         </form>
       </div>
 
       {/* Projects list */}
       {loading ? (
-        <p>Loading projects...</p>
+        <div className="rounded-2xl border border-slate-800 bg-slate-900/80 px-4 py-6 text-sm text-slate-200">
+          Loading projects...
+        </div>
       ) : projects.length === 0 ? (
-        <div
-          style={{
-            padding: "1rem",
-            borderRadius: "8px",
-            background: "white",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-          }}
-        >
-          <p style={{ marginBottom: "0.25rem" }}>You don&apos;t have any projects yet.</p>
-          <p style={{ fontSize: "0.9rem", opacity: 0.8 }}>
+        <div className="rounded-2xl border border-slate-800 bg-slate-900/80 px-4 py-6 text-sm text-slate-200">
+          <p className="mb-1">You don&apos;t have any projects yet.</p>
+          <p className="text-xs text-slate-400">
             Use the form above to create your first project.
           </p>
         </div>
       ) : (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-            gap: "1rem",
-          }}
-        >
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {projects.map((project) => (
             <Link
               key={project._id}
               to={`/projects/${project._id}`}
-              style={{ textDecoration: "none", color: "inherit" }}
+              className="group rounded-2xl border border-slate-800 bg-slate-900/80 p-4 shadow-sm backdrop-blur transition-transform hover:-translate-y-0.5 hover:border-indigo-500/70"
             >
-              <div
-                style={{
-                  background: "white",
-                  borderRadius: "8px",
-                  padding: "1rem",
-                  boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-                  height: "100%",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "space-between",
-                }}
-              >
+              <div className="flex flex-col h-full justify-between gap-2">
                 <div>
-                  <h3 style={{ marginBottom: "0.5rem" }}>{project.name}</h3>
+                  <h3 className="text-sm font-semibold text-slate-50 group-hover:text-white">
+                    {project.name}
+                  </h3>
                   {project.description && (
-                    <p style={{ fontSize: "0.9rem", opacity: 0.85 }}>
+                    <p className="mt-1 text-xs text-slate-300 line-clamp-3">
                       {project.description}
                     </p>
                   )}
                 </div>
-                <p
-                  style={{
-                    marginTop: "0.75rem",
-                    fontSize: "0.8rem",
-                    opacity: 0.7,
-                  }}
-                >
-                  Created at: {new Date(project.createdAt).toLocaleString()}
+                <p className="mt-2 text-[0.7rem] text-slate-400">
+                  Created:{" "}
+                  {project.createdAt
+                    ? new Date(project.createdAt).toLocaleString()
+                    : "Unknown"}
                 </p>
               </div>
             </Link>

@@ -12,89 +12,67 @@ function MainLayout({ children }) {
   }
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        background: "#f5f5f5",
-      }}
-    >
-      {/* Top navbar */}
-      <header
-        style={{
-          padding: "0.75rem 1.5rem",
-          background: "#111827",
-          color: "white",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        {/* Left side: logo/title */}
-        <Link to="/projects" style={{ textDecoration: "none", color: "white" }}>
-          <span style={{ fontWeight: "bold", fontSize: "1.1rem" }}>
-            MERN Project Manager
-          </span>
-        </Link>
-
-        {/* Right side: navigation / user */}
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <Link
-            to="/projects"
-            style={{ color: "white", textDecoration: "none", fontSize: "0.95rem" }}
-          >
-            Projects
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+      {/* top bar */}
+      <header className="border-b border-slate-800 bg-slate-950/80 backdrop-blur sticky top-0 z-20">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
+          {/* left: logo / title */}
+          <Link to="/projects" className="flex items-center gap-2">
+            <div className="h-8 w-8 rounded-xl bg-indigo-500/90 flex items-center justify-center text-xs font-bold">
+              PM
+            </div>
+            <span className="text-sm font-semibold tracking-tight">
+              MERN Project Manager
+            </span>
           </Link>
 
-          {user ? (
-            <>
-              <span style={{ fontSize: "0.9rem", opacity: 0.9 }}>
-                Hi, {user.name}
-              </span>
-              <button
-                onClick={handleLogout}
-                style={{
-                  padding: "0.4rem 0.8rem",
-                  background: "#f97316",
-                  border: "none",
-                  borderRadius: "4px",
-                  cursor: "pointer",
-                  fontSize: "0.85rem",
-                }}
-              >
-                Logout
-              </button>
-            </>
-          ) : (
-            <>
-              <Link
-                to="/login"
-                style={{ color: "white", textDecoration: "none", fontSize: "0.9rem" }}
-              >
-                Login
-              </Link>
-              <Link
-                to="/register"
-                style={{ color: "white", textDecoration: "none", fontSize: "0.9rem" }}
-              >
-                Register
-              </Link>
-            </>
-          )}
+          {/* right: nav / auth */}
+          <div className="flex items-center gap-4 text-sm">
+            <Link
+              to="/projects"
+              className="text-slate-200 hover:text-white transition-colors"
+            >
+              Projects
+            </Link>
+
+            {user ? (
+              <>
+                <span className="hidden sm:inline text-xs text-slate-300">
+                  Hi, <span className="font-medium">{user.name}</span>
+                </span>
+                <button
+                  onClick={handleLogout}
+                  className="rounded-lg bg-slate-800 px-3 py-1.5 text-xs font-semibold text-slate-50 hover:bg-slate-700 transition-colors"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  className="text-slate-200 hover:text-white transition-colors"
+                >
+                  Login
+                </Link>
+                <Link
+                  to="/register"
+                  className="rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-slate-950 hover:bg-emerald-400 transition-colors"
+                >
+                  Register
+                </Link>
+              </>
+            )}
+          </div>
         </div>
       </header>
 
-      {/* Page content */}
-      <main
-        style={{
-          flex: 1,
-          maxWidth: "960px",
-          margin: "0 auto",
-          padding: "1.5rem 1rem 2rem",
-        }}
-      >
-        {children}
+      {/* subtle background gradient */}
+      <div className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(circle_at_top,#4f46e5_0,transparent_55%),radial-gradient(circle_at_bottom,#ec4899_0,transparent_55%)] opacity-20" />
+
+      {/* main content */}
+      <main className="flex-1">
+        <div className="mx-auto max-w-5xl px-4 py-6">{children}</div>
       </main>
     </div>
   );
