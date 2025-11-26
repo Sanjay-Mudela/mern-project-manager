@@ -3,6 +3,8 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const authRoutes = require("./routes/authRoutes");
+const projectRoutes = require("./routes/projectRoutes");
+
 
 dotenv.config();
 
@@ -11,6 +13,7 @@ const app = express();
 app.use(cors()); // Allow requests from frontend
 app.use(express.json()); // Let server understand JSON body
 app.use("/api/auth", authRoutes);
+app.use("/api/projects", projectRoutes);
 
 
 app.get("/api/health", (req, res) => {
