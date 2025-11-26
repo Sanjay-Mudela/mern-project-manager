@@ -1,6 +1,6 @@
-// src/pages/RegisterPage.jsx
 import { useContext, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import toast from "react-hot-toast";
 import { AuthContext } from "../context/AuthContext";
 
 function RegisterPage() {
@@ -17,22 +17,28 @@ function RegisterPage() {
     setError("");
 
     if (!name || !email || !password) {
-      setError("Please fill all fields");
+      const msg = "Please fill all fields";
+      setError(msg);
+      toast.error(msg);
       return;
     }
 
     const result = await register(name, email, password);
 
     if (result.success) {
+      toast.success("Account created successfully");
       navigate("/projects");
     } else {
-      setError(result.message || "Registration failed");
+      const msg = result.message || "Registration failed";
+      setError(msg);
+      toast.error(msg);
     }
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-950">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,#22c55e_0,transparent_55%),radial-gradient(circle_at_bottom,#06b6d4_0,transparent_55%)] opacity-35" />
+
       <div className="relative z-10 w-full max-w-md px-4">
         <div className="bg-slate-900/80 border border-slate-700 rounded-2xl shadow-xl backdrop-blur-sm px-6 py-7">
           <div className="mb-6">

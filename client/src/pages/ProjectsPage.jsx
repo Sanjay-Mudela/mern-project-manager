@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
 import api from "../api/client";
 
 function ProjectsPage() {
@@ -20,11 +21,10 @@ function ProjectsPage() {
         setProjects(res.data.projects || []);
       } catch (err) {
         console.error("Error fetching projects:", err);
-        let msg = "Could not load projects. Please try again.";
-        if (err.response?.data?.message) {
-          msg = err.response.data.message;
-        }
+        const msg =
+          err.response?.data?.message || "Could not load projects. Please try again.";
         setError(msg);
+        toast.error(msg);
       } finally {
         setLoading(false);
       }
@@ -38,7 +38,9 @@ function ProjectsPage() {
     setError("");
 
     if (!name.trim()) {
-      setError("Project name is required");
+      const msg = "Project name is required";
+      setError(msg);
+      toast.error(msg);
       return;
     }
 
@@ -53,13 +55,13 @@ function ProjectsPage() {
       setProjects((prev) => [newProject, ...prev]);
       setName("");
       setDescription("");
+      toast.success("Project created");
     } catch (err) {
       console.error("Error creating project:", err);
-      let msg = "Could not create project.";
-      if (err.response?.data?.message) {
-        msg = err.response.data.message;
-      }
+      const msg =
+        err.response?.data?.message || "Could not create project.";
       setError(msg);
+      toast.error(msg);
     } finally {
       setCreating(false);
     }
@@ -128,10 +130,11 @@ function ProjectsPage() {
         </form>
       </div>
 
-      {/* Projects list */}
+      {/* Projects list / loading / empty */}
       {loading ? (
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/80 px-4 py-6 text-sm text-slate-200">
-          Loading projects...
+        // ✅ spinner instead of plain text
+        <div className="flex justify-center py-10">
+          <div className="w-6 h-6 border-2 border-slate-500 border-t-transparent rounded-full animate-spin" />
         </div>
       ) : projects.length === 0 ? (
         <div className="rounded-2xl border border-slate-800 bg-slate-900/80 px-4 py-6 text-sm text-slate-200">

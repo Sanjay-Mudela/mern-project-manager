@@ -1,6 +1,6 @@
-// src/pages/LoginPage.jsx
 import { useContext, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import toast from "react-hot-toast";
 import { AuthContext } from "../context/AuthContext";
 
 function LoginPage() {
@@ -16,22 +16,26 @@ function LoginPage() {
     setError("");
 
     if (!email || !password) {
-      setError("Please enter email and password");
+      const msg = "Please enter email and password";
+      setError(msg);
+      toast.error(msg);
       return;
     }
 
     const result = await login(email, password);
 
     if (result.success) {
+      toast.success("Logged in successfully");
       navigate("/projects");
     } else {
-      setError(result.message || "Login failed");
+      const msg = result.message || "Login failed";
+      setError(msg);
+      toast.error(msg);
     }
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-950">
-      {/* subtle gradient background blur */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,#1d4ed8_0,transparent_55%),radial-gradient(circle_at_bottom,#f97316_0,transparent_55%)] opacity-40" />
 
       <div className="relative z-10 w-full max-w-md px-4">
