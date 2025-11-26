@@ -3,23 +3,51 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ProjectsPage from "./pages/ProjectsPage";
 import ProjectDetailsPage from "./pages/ProjectDetailsPage";
+import ProtectedRoute from "./components/ProtectedRoute";
+import MainLayout from "./components/MainLayout";
 
 function App() {
   return (
     <Routes>
-      {/* Default route - for now redirect to /projects */}
+      {/* Default: go to /projects (ProtectedRoute will redirect to /login if needed) */}
       <Route path="/" element={<Navigate to="/projects" replace />} />
 
-      {/* Auth routes */}
+      {/* Public routes */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
 
-      {/* Projects */}
-      <Route path="/projects" element={<ProjectsPage />} />
-      <Route path="/projects/:projectId" element={<ProjectDetailsPage />} />
+      {/* Protected routes with layout */}
+      <Route
+        path="/projects"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <ProjectsPage />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
 
-      {/* Fallback for unknown routes */}
-      <Route path="*" element={<div style={{ padding: "2rem" }}><h1>404 - Page not found</h1></div>} />
+      <Route
+        path="/projects/:projectId"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <ProjectDetailsPage />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* 404 fallback */}
+      <Route
+        path="*"
+        element={
+          <div style={{ padding: "2rem" }}>
+            <h1>404 - Page not found</h1>
+          </div>
+        }
+      />
     </Routes>
   );
 }
