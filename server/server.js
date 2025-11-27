@@ -35,6 +35,10 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "ok", message: "Server is running" });
 });
 
+// THIS IS THE ONE THAT MAKES RENDER HAPPY
+app.get("/", (req, res) => {
+  res.status(200).send("MERN Project Manager API is live!");
+});
 
 const PORT = process.env.PORT || 5000;
 
